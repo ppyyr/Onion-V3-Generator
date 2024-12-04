@@ -1,23 +1,27 @@
 import base64
 import hashlib
-import nacl.signing
-import nacl.encoding
+from cryptography.hazmat.primitives.asymmetric import ed25519
+from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption, PublicFormat
 import argparse
-
 
 class OnionGenerator:
     @staticmethod
     def generate_address():
         # Generate key pair
-        signing_key = nacl.signing.SigningKey.generate()
-        secret_key = signing_key.encode()
-        expanded_secret_key = OnionGenerator.expand_secret_key(secret_key)
-        public_key = signing_key.verify_key.encode()
+        private_key = ed25519.Ed25519PrivateKey.generate()
+        public_key = private_key.public_key()
+        
+        # Serialize keys
+        private_bytes = private_key.private_bytes(Encoding.Raw, PrivateFormat.Raw, NoEncryption())
+        public_bytes = public_key.public_bytes(Encoding.Raw, PublicFormat.Raw)
+        
+        # Expand secret key
+        expanded_secret_key = OnionGenerator.expand_secret_key(private_bytes)
         
         # Generate onion address
-        onion_address = OnionGenerator.encode_public_key(public_key)
+        onion_address = OnionGenerator.encode_public_key(public_bytes)
         
-        public = b"== ed25519v1-public: type0 ==\x00\x00\x00" + public_key
+        public = b"== ed25519v1-public: type0 ==\x00\x00\x00" + public_bytes
         secret = b"== ed25519v1-secret: type0 ==\x00\x00\x00" + expanded_secret_key
         
         return {
@@ -45,7 +49,7 @@ class OnionGenerator:
     @staticmethod
     def expand_secret_key(secret_key):
         # Expand the secret key to meet the required format
-        hash_bytes = hashlib.sha512(secret_key[:nacl.bindings.crypto_box_SECRETKEYBYTES]).digest()
+        hash_bytes = hashlib.sha512(secret_key).digest()
         hash_list = list(hash_bytes)
         hash_list[0] &= 248
         hash_list[31] &= 127
