@@ -34,14 +34,9 @@ pip3 install -r requirements.txt
 
 ## ⚙️ Usage
 
-### Generate infinite domains starting with "github"
+To generate domains which start with "github" or "example" use:
 ```bash
-python3 onion_generator --prefix=github --count=-1
-```
-
-### Generate a random domains
-```bash
-python3 onion_generator
+python3 onion_generator github example
 ```
 
 ## 💡 Contributing to the project

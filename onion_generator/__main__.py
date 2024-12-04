@@ -31,6 +31,8 @@ class OnionGenerator:
         public = b"== ed25519v1-public: type0 ==\x00\x00\x00" + public_bytes
         secret = b"== ed25519v1-secret: type0 ==\x00\x00\x00" + expanded_secret_key
         
+        OnionGenerator.generated_count += 1
+        
         return {
             "hostname": onion_address,
             "public": base64.b64encode(public).decode(),
@@ -38,13 +40,13 @@ class OnionGenerator:
         }
 
     @staticmethod
-    def generate_with_prefix(prefix):
+    def generate_with_prefix(prefixes):
         while True:
             generated = OnionGenerator.generate_address()
-            OnionGenerator.generated_count += 1
-            if generated["hostname"].startswith(prefix):
-                OnionGenerator.found_count += 1
-                return generated
+            for prefix in prefixes:
+                if generated["hostname"].startswith(prefix):
+                    OnionGenerator.found_count += 1
+                    return generated
 
     @staticmethod
     def encode_public_key(public_key):
@@ -77,10 +79,10 @@ def periodic_update(interval):
 
 def keypress_update():
     if not sys.stdin.isatty():
-        print("[!] Non-TTY environment detected. Keypress updates are disabled.")
+        print("[!] Non-TTY environment detected. Keypress updates are disabled.\n")
         return
 
-    print("[i] Press Enter to see the current status:")
+    print("[i] Press Enter to see the current status:\n")
     while True:
         if select.select([sys.stdin], [], [], 0.1)[0]:
             sys.stdin.read(1)
@@ -89,9 +91,15 @@ def keypress_update():
 
 def main():
     parser = argparse.ArgumentParser(description="Generate Tor .onion addresses.")
-    parser.add_argument("--prefix", type=str, help="Prefix for the hostname", default=None)
-    parser.add_argument("--count", type=int, help="Number of addresses to generate (-1 for infinite)", default=1)
+    parser.add_argument("prefixes", nargs="+", help="List of prefixes for the hostname")
     args = parser.parse_args()
+
+    # Ensure at least one prefix is provided
+    if not args.prefixes:
+        print("[!] Error: At least one prefix must be provided.")
+        sys.exit(1)
+
+    prefixes = [prefix.strip().lower() for prefix in args.prefixes]
 
     # Start threads
     threading.Thread(target=periodic_update, args=(30,), daemon=True).start()
@@ -99,18 +107,13 @@ def main():
 
     try:
         print("[@] Generating addresses...")
-        while args.count == -1 or OnionGenerator.generated_count < args.count:
-            if args.prefix:
-                result = OnionGenerator.generate_with_prefix(args.prefix)
-            else:
-                result = OnionGenerator.generate_address()
-
-            OnionGenerator.generated_count += 1
+        while True:
+            result = OnionGenerator.generate_with_prefix(prefixes)
 
             print('[√] Address generated successfully!')
             print(f"Hostname:                      {result['hostname']}")
             print(f"Public Key (Base64 encoded):   {result['public']}")
-            print(f"Private Key (Base64 encoded):  {result['private']}")
+            print(f"Private Key (Base64 encoded):  {result['private']}\n")
 
     except KeyboardInterrupt:
         print("[!] Stopping generation...")
