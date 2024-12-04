@@ -1,10 +1,17 @@
 import base64
 import hashlib
+import threading
+import time
+import sys
+import select
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption, PublicFormat
 import argparse
 
 class OnionGenerator:
+    generated_count = 0
+    found_count = 0
+
     @staticmethod
     def generate_address():
         # Generate key pair
@@ -30,21 +37,20 @@ class OnionGenerator:
             "private": base64.b64encode(secret).decode()
         }
 
-
     @staticmethod
     def generate_with_prefix(prefix):
         while True:
             generated = OnionGenerator.generate_address()
+            OnionGenerator.generated_count += 1
             if generated["hostname"].startswith(prefix):
+                OnionGenerator.found_count += 1
                 return generated
-
 
     @staticmethod
     def encode_public_key(public_key):
         checksum = hashlib.sha3_256(b".onion checksum" + public_key + b"\x03").digest()[:2]
         onion_address = public_key + checksum + b"\x03"
         return OnionGenerator.base32_encode(onion_address).lower() + ".onion"
-
 
     @staticmethod
     def expand_secret_key(secret_key):
@@ -57,11 +63,24 @@ class OnionGenerator:
         
         return bytes(hash_list)
 
-
     @staticmethod
     def base32_encode(data):
         # Base32 encode the data
         return base64.b32encode(data).decode('utf-8').strip("=")
+
+
+def periodic_update(interval):
+    while True:
+        time.sleep(interval)
+        print(f"[@] {time.strftime('%H:%M:%S')}: Generated {OnionGenerator.generated_count} addresses, Found {OnionGenerator.found_count} addresses")
+
+
+def keypress_update():
+    print("[i] Press Enter to see the current status:")
+    while True:
+        if select.select([sys.stdin], [], [], 0.1)[0]:
+            sys.stdin.read(1)
+            print(f"[@] {time.strftime('%H:%M:%S')}: Generated {OnionGenerator.generated_count} addresses, Found {OnionGenerator.found_count} addresses")
 
 
 def main():
@@ -70,22 +89,25 @@ def main():
     parser.add_argument("--count", type=int, help="Number of addresses to generate (-1 for infinite)", default=1)
     args = parser.parse_args()
 
-    generated_count = 0
+    # Start threads
+    threading.Thread(target=periodic_update, args=(30,), daemon=True).start()
+    threading.Thread(target=keypress_update, daemon=True).start()
 
     try:
-        print("[@] Generating addresses...\n")
-        while args.count == -1 or generated_count < args.count:
+        print("[@] Generating addresses...")
+        while args.count == -1 or OnionGenerator.generated_count < args.count:
             if args.prefix:
                 result = OnionGenerator.generate_with_prefix(args.prefix)
             else:
                 result = OnionGenerator.generate_address()
 
+            OnionGenerator.generated_count += 1
+
             print('[√] Address generated successfully!')
             print(f"Hostname:                      {result['hostname']}")
             print(f"Public Key (Base64 encoded):   {result['public']}")
-            print(f"Private Key (Base64 encoded):  {result['private']}\n")
+            print(f"Private Key (Base64 encoded):  {result['private']}")
 
-            generated_count += 1
     except KeyboardInterrupt:
         print("[!] Stopping generation...")
 
