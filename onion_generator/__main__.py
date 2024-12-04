@@ -76,6 +76,10 @@ def periodic_update(interval):
 
 
 def keypress_update():
+    if not sys.stdin.isatty():
+        print("[!] Non-TTY environment detected. Keypress updates are disabled.")
+        return
+
     print("[i] Press Enter to see the current status:")
     while True:
         if select.select([sys.stdin], [], [], 0.1)[0]:
