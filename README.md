@@ -39,6 +39,33 @@ To generate domains which start with "github" or "example" use:
 python3 onion_generator github example
 ```
 
+### Multi-threading Options
+
+By default, the generator uses all available CPU cores for maximum performance. The program now uses true multi-threading with multiple worker threads running in parallel:
+
+```bash
+# Use 4 threads for parallel generation
+python3 onion_generator --threads 4 github example
+
+# Use default (all CPU cores) - recommended for best performance
+python3 onion_generator github example
+
+# Use 8 threads for high-performance systems
+python3 onion_generator --threads 8 github example
+```
+
+### Performance Improvements
+
+- **True Multi-threading**: Multiple worker threads generate addresses in parallel
+- **Scalable Performance**: Performance scales with the number of CPU cores
+- **Efficient Resource Usage**: Optimized thread management and statistics tracking
+- **Real-time Statistics**: Live updates showing generation progress across all threads
+
+### Command Line Options
+
+- `--threads NUMBER`: Specify the number of threads to use (default: CPU core count)
+- `--help`: Show help message and available options
+
 ## 💡 Contributing to the project
 To contribute, first fork this repository, and `clone` it. Make your changes, whether you're fixing bugs or adding features. When done, `commit` your changes, `push` them, and submit a `pull request` for review to this repository.
 
