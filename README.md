@@ -33,7 +33,7 @@ The Rust implementation is significantly faster than the Python version:
 
 ### Build from Source
 ```bash
-git clone https://github.com/your-username/onion-generator-rust.git
+git clone https://github.com/ppyyr/Onion-V3-Generator
 cd onion-generator-rust
 cargo build --release
 ```
@@ -146,18 +146,6 @@ cargo build --release
 ### Benchmarking
 ```bash
 cargo bench
-```
-
-## 📦 Docker Support
-
-Build Docker image:
-```bash
-docker build -t onion-generator .
-```
-
-Run in container:
-```bash
-docker run --rm onion-generator github example
 ```
 
 ## 🤝 Contributing
