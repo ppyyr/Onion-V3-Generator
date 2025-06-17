@@ -2,10 +2,10 @@
 name = "onion-generator"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["ppyyr <ppyyr@live.jp>"]
 description = "A fast Tor .onion V3 address generator with multi-process support"
 license = "MIT"
-repository = "https://github.com/your-username/onion-generator"
+repository = "https://github.com/ppyyr/Onion-V3-Generator"
 
 [[bin]]
 name = "onion-generator"

@@ -11,7 +11,7 @@ static RUNNING: AtomicBool = AtomicBool::new(true);
 fn main() -> Result<()> {
     let matches = Command::new("onion-generator")
         .version("0.1.0")
-        .author("Your Name <your.email@example.com>")
+        .author("ppyyr <ppyyr@live.jp>")
         .about("A fast Tor .onion V3 address generator with multi-process support")
         .arg(
             Arg::new("prefixes")
