@@ -1,0 +1,53 @@
+[package]
+name = "onion-generator"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A fast Tor .onion V3 address generator with multi-process support"
+license = "MIT"
+repository = "https://github.com/your-username/onion-generator"
+
+[[bin]]
+name = "onion-generator"
+path = "src/main.rs"
+
+[dependencies]
+# Cryptography
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+sha3 = "0.10"
+rand = "0.8"
+
+# Encoding
+base64 = "0.22"
+base32 = "0.5"
+
+# CLI and async
+clap = { version = "4.4", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+rayon = "1.8"
+
+# Utilities
+anyhow = "1.0"
+crossterm = "0.27"
+indicatif = "0.17"
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+ctrlc = "3.4"
+atty = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.dev]
+opt-level = 1
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "generation_benchmark"
+harness = false

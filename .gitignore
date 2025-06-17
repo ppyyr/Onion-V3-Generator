@@ -1,2 +1,39 @@
-.venv
-__pycache__
+# Rust build artifacts
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.test
+
+# Benchmark results
+criterion/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Generated documentation
+/docs/target/
